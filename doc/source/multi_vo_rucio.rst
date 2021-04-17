@@ -95,6 +95,22 @@ to be updated in order to use the database. While the history will be
 inaccessible from the new VO, it will still exist in the database and could be
 accessed using the ``super_root`` account if needed.
 
+Long VO Name Mapping
+--------------------
+
+The rucio database stores all VO references as a single three-character token
+for performance reasons. It's possible to create aliases for these tokens to
+allow users/clients to specify long VO names and have these converted to the
+short names automatically. On the server-side rucio.cfg, create a mapping
+section called vo-map::
+
+  [vo-map]
+  my.long.vo = mlv
+  another.vo = ant
+
+You may specify more than one alias for a VO if required.
+
+
 S-VO to M-VO
 ------------
 

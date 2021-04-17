@@ -30,6 +30,7 @@ Interface for identity abstraction layer
 from rucio.api import permission
 from rucio.common import exception
 from rucio.common.types import InternalAccount
+from rucio.common.utils import map_vo
 from rucio.core import identity
 from rucio.db.sqla.constants import IdentityType
 
@@ -54,6 +55,7 @@ def del_identity(identity_key, id_type, issuer, vo='def'):
     :param issuer: The issuer account.
     :param vo: the VO of the issuer.
     """
+    vo = map_vo(vo)
     id_type = IdentityType[id_type.upper()]
     kwargs = {'accounts': identity.list_accounts_for_identity(identity_key, id_type)}
     if not permission.has_permission(issuer=issuer, vo=vo, action='del_identity', kwargs=kwargs):
@@ -75,6 +77,7 @@ def add_account_identity(identity_key, id_type, account, email, issuer, default=
     :param password: Password if id_type is userpass.
     :param vo: the VO to act on.
     """
+    vo = map_vo(vo)
     kwargs = {'identity': identity_key, 'type': id_type, 'account': account}
     if not permission.has_permission(issuer=issuer, vo=vo, action='add_account_identity', kwargs=kwargs):
         raise exception.AccessDenied('Account %s can not add account identity' % (issuer))
@@ -94,6 +97,7 @@ def del_account_identity(identity_key, id_type, account, issuer, vo='def'):
     :param issuer: The issuer account.
     :param vo: the VO to act on.
     """
+    vo = map_vo(vo)
     kwargs = {'account': account}
     if not permission.has_permission(issuer=issuer, vo=vo, action='del_account_identity', kwargs=kwargs):
         raise exception.AccessDenied('Account %s can not delete account identity' % (issuer))

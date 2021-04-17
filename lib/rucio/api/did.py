@@ -40,7 +40,7 @@ from rucio.common.constants import RESERVED_KEYS
 from rucio.common.exception import RucioException
 from rucio.common.schema import validate_schema
 from rucio.common.types import InternalAccount, InternalScope
-from rucio.common.utils import api_update_return_dict
+from rucio.common.utils import api_update_return_dict, map_vo
 from rucio.core import did, naming_convention, meta as meta_core
 from rucio.core.rse import get_rse_id
 from rucio.db.sqla.constants import DIDType
@@ -60,6 +60,7 @@ def list_dids(scope, filters, type='collection', ignore_case=False, limit=None, 
     :param recursive: Recursively list DIDs content.
     :param vo: The VO to act on.
     """
+    vo = map_vo(vo)
     validate_schema(name='did_filters', obj=filters, vo=vo)
 
     scope = InternalScope(scope, vo=vo)
@@ -89,6 +90,7 @@ def list_dids_extended(scope, filters, type='collection', ignore_case=False, lim
     :param long: Long format option to display more information for each DID.
     :param recursive: Recursively list DIDs content.
     """
+    vo = map_vo(vo)
     validate_schema(name='did_filters', obj=filters, vo=vo)
     scope = InternalScope(scope, vo=vo)
 
@@ -121,6 +123,7 @@ def add_did(scope, name, type, issuer, account=None, statuses={}, meta={}, rules
     :param rse: The RSE name when registering replicas.
     :param vo: The VO to act on.
     """
+    vo = map_vo(vo)
     v_did = {'name': name, 'type': type.upper(), 'scope': scope}
     validate_schema(name='did', obj=v_did, vo=vo)
     validate_schema(name='dids', obj=dids, vo=vo)
@@ -170,6 +173,7 @@ def add_dids(dids, issuer, vo='def'):
     :param issuer: The issuer account.
     :param vo: The VO to act on.
     """
+    vo = map_vo(vo)
     for d in dids:
         if 'rse' in d:
             rse_id = None
@@ -200,6 +204,7 @@ def attach_dids(scope, name, attachment, issuer, vo='def'):
     :param issuer: The issuer account.
     :param vo: The VO to act on.
     """
+    vo = map_vo(vo)
     validate_schema(name='attachment', obj=attachment, vo=vo)
 
     rse_id = None
@@ -240,6 +245,7 @@ def attach_dids_to_dids(attachments, issuer, ignore_duplicate=False, vo='def'):
     :param ignore_duplicate: If True, ignore duplicate entries.
     :param vo: The VO to act on.
     """
+    vo = map_vo(vo)
     validate_schema(name='attachments', obj=attachments, vo=vo)
 
     for a in attachments:
@@ -274,6 +280,7 @@ def detach_dids(scope, name, dids, issuer, vo='def'):
     :param issuer: The issuer account.
     :param vo: The VO to act on.
     """
+    vo = map_vo(vo)
     kwargs = {'scope': scope, 'name': name, 'dids': dids, 'issuer': issuer}
     if not rucio.api.permission.has_permission(issuer=issuer, vo=vo, action='detach_dids', kwargs=kwargs):
         raise rucio.common.exception.AccessDenied('Account %s can not detach data identifiers from %s:%s' % (issuer, scope, name))
@@ -295,6 +302,7 @@ def list_new_dids(type=None, thread=None, total_threads=None, chunk_size=1000, v
     :param chunk_size: Number of requests to return per yield.
     :param vo: The VO to act on.
     """
+    vo = map_vo(vo)
     dids = did.list_new_dids(did_type=type and DIDType[type.upper()], thread=thread, total_threads=total_threads, chunk_size=chunk_size)
     for d in dids:
         if d['scope'].vo == vo:
@@ -310,6 +318,7 @@ def set_new_dids(dids, new_flag=True, vo='def'):
     :param new_flag: A boolean to flag new DIDs.
     :param vo: The VO to act on.
     """
+    vo = map_vo(vo)
     for d in dids:
         d['scope'] = InternalScope(d['scope'], vo=vo)
 
@@ -325,6 +334,7 @@ def list_content(scope, name, vo='def'):
     :param vo: The VO to act on.
     """
 
+    vo = map_vo(vo)
     scope = InternalScope(scope, vo=vo)
 
     dids = did.list_content(scope=scope, name=name)
@@ -341,6 +351,7 @@ def list_content_history(scope, name, vo='def'):
     :param vo: The VO to act on.
     """
 
+    vo = map_vo(vo)
     scope = InternalScope(scope, vo=vo)
 
     dids = did.list_content_history(scope=scope, name=name)
@@ -359,6 +370,7 @@ def list_files(scope, name, long, vo='def'):
     :param vo: The VO to act on.
     """
 
+    vo = map_vo(vo)
     scope = InternalScope(scope, vo=vo)
 
     dids = did.list_files(scope=scope, name=name, long=long)
@@ -377,6 +389,7 @@ def scope_list(scope, name=None, recursive=False, vo='def'):
     :param vo: The VO to act on.
     """
 
+    vo = map_vo(vo)
     scope = InternalScope(scope, vo=vo)
 
     dids = did.scope_list(scope, name=name, recursive=recursive)
@@ -400,6 +413,7 @@ def get_did(scope, name, dynamic=False, vo='def'):
     :return did: Dictionary containing {'name', 'scope', 'type'}, Exception otherwise
     """
 
+    vo = map_vo(vo)
     scope = InternalScope(scope, vo=vo)
 
     d = did.get_did(scope=scope, name=name, dynamic=dynamic)
@@ -418,6 +432,7 @@ def set_metadata(scope, name, key, value, issuer, recursive=False, vo='def'):
     :param recursive: Option to propagate the metadata update to content.
     :param vo: The VO to act on.
     """
+    vo = map_vo(vo)
     kwargs = {'scope': scope, 'name': name, 'key': key, 'value': value, 'issuer': issuer}
 
     if key in RESERVED_KEYS:
@@ -441,6 +456,7 @@ def set_metadata_bulk(scope, name, meta, issuer, recursive=False, vo='def'):
     :param recursive: Option to propagate the metadata update to content.
     :param vo: The VO to act on.
     """
+    vo = map_vo(vo)
     kwargs = {'scope': scope, 'name': name, 'meta': meta, 'issuer': issuer}
 
     for key in meta:
@@ -463,6 +479,7 @@ def get_metadata(scope, name, plugin='DID_COLUMN', vo='def'):
     :param vo: The VO to act on.
     """
 
+    vo = map_vo(vo)
     scope = InternalScope(scope, vo=vo)
 
     d = did.get_metadata(scope=scope, name=name, plugin=plugin)
@@ -476,6 +493,7 @@ def get_metadata_bulk(dids, vo='def', session=None):
     :param session: The database session in use.
     """
 
+    vo = map_vo(vo)
     validate_schema(name='dids', obj=dids, vo=vo)
     for entry in dids:
         entry['scope'] = InternalScope(entry['scope'], vo=vo)
@@ -494,6 +512,7 @@ def delete_metadata(scope, name, key, vo='def'):
     :param vo: The VO to act on.
     """
 
+    vo = map_vo(vo)
     scope = InternalScope(scope, vo=vo)
     return did.delete_metadata(scope=scope, name=name, key=key)
 
@@ -509,6 +528,7 @@ def set_status(scope, name, issuer, vo='def', **kwargs):
     :param vo: The VO to act on.
     """
 
+    vo = map_vo(vo)
     if not rucio.api.permission.has_permission(issuer=issuer, vo=vo, action='set_status', kwargs={'scope': scope, 'name': name, 'issuer': issuer}):
         raise rucio.common.exception.AccessDenied('Account %s can not set status on data identifier %s:%s' % (issuer, scope, name))
 
@@ -525,6 +545,7 @@ def get_dataset_by_guid(guid, vo='def'):
 
     :returns: A did
     """
+    vo = map_vo(vo)
     dids = did.get_dataset_by_guid(guid=guid)
 
     for d in dids:
@@ -542,6 +563,7 @@ def list_parent_dids(scope, name, vo='def'):
     :param vo:      The VO to act on.
     """
 
+    vo = map_vo(vo)
     scope = InternalScope(scope, vo=vo)
 
     dids = did.list_parent_dids(scope=scope, name=name)
@@ -563,6 +585,7 @@ def create_did_sample(input_scope, input_name, output_scope, output_name, issuer
     :param issuer: The issuer account.
     :param vo: The VO to act on.
     """
+    vo = map_vo(vo)
     kwargs = {'issuer': issuer, 'scope': output_scope}
     if not rucio.api.permission.has_permission(issuer=issuer, vo=vo, action='create_did_sample', kwargs=kwargs):
         raise rucio.common.exception.AccessDenied('Account %s can not bulk add data identifier' % (issuer))
@@ -583,6 +606,7 @@ def resurrect(dids, issuer, vo='def'):
     :param issuer: The issuer account.
     :param vo: The VO to act on.
     """
+    vo = map_vo(vo)
     kwargs = {'issuer': issuer}
     if not rucio.api.permission.has_permission(issuer=issuer, vo=vo, action='resurrect', kwargs=kwargs):
         raise rucio.common.exception.AccessDenied('Account %s can not resurrect data identifiers' % (issuer))
@@ -603,6 +627,7 @@ def list_archive_content(scope, name, vo='def'):
     :param vo: The VO to act on.
     """
 
+    vo = map_vo(vo)
     scope = InternalScope(scope, vo=vo)
 
     dids = did.list_archive_content(scope=scope, name=name)
@@ -619,6 +644,7 @@ def add_did_to_followed(scope, name, account, session=None, vo='def'):
     :param account: The account owner.
     :param session: The database session in use.
     """
+    vo = map_vo(vo)
     scope = InternalScope(scope, vo=vo)
     account = InternalAccount(account, vo=vo)
     return did.add_did_to_followed(scope=scope, name=name, account=account, session=session)
@@ -632,6 +658,7 @@ def add_dids_to_followed(dids, account, session=None, vo='def'):
     :param account: The account owner.
     :param session: The database session in use.
     """
+    vo = map_vo(vo)
     account = InternalAccount(account, vo=vo)
     return did.add_dids_to_followed(dids=dids, account=account, session=session)
 
@@ -644,6 +671,7 @@ def get_users_following_did(name, scope, session=None, vo='def'):
     :param name: The data identifier name.
     :param session: The database session in use.
     """
+    vo = map_vo(vo)
     scope = InternalScope(scope, vo=vo)
     users = did.get_users_following_did(name=name, scope=scope, session=session)
     for user in users:
@@ -661,6 +689,7 @@ def remove_did_from_followed(scope, name, account, issuer, session=None, vo='def
     :param session: The database session in use.
     :param issuer: The issuer account
     """
+    vo = map_vo(vo)
     kwargs = {'scope': scope, 'issuer': issuer}
     if not rucio.api.permission.has_permission(issuer=issuer, vo=vo, action='remove_did_from_followed', kwargs=kwargs):
         raise rucio.common.exception.AccessDenied('Account %s can not remove data identifiers from followed table' % (issuer))
@@ -678,6 +707,7 @@ def remove_dids_from_followed(dids, account, issuer, session=None, vo='def'):
     :param account: The account owner.
     :param session: The database session in use.
     """
+    vo = map_vo(vo)
     kwargs = {'dids': dids, 'issuer': issuer}
     if not rucio.api.permission.has_permission(issuer=issuer, vo=vo, action='remove_dids_from_followed', kwargs=kwargs):
         raise rucio.common.exception.AccessDenied('Account %s can not bulk remove data identifiers from followed table' % (issuer))

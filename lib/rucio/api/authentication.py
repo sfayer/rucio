@@ -30,7 +30,7 @@
 from rucio.api import permission
 from rucio.common import exception
 from rucio.common.types import InternalAccount
-from rucio.common.utils import api_update_return_dict
+from rucio.common.utils import api_update_return_dict, map_vo
 from rucio.core import authentication, identity, oidc
 from rucio.db.sqla.constants import IdentityType
 
@@ -45,6 +45,7 @@ def refresh_cli_auth_token(token_string, account, vo='def'):
 
     :return: tuple of (access token, expiration epoch), None otherswise
     """
+    vo = map_vo(vo)
     account = InternalAccount(account, vo=vo)
     return oidc.refresh_cli_auth_token(token_string, account)
 
@@ -102,6 +103,7 @@ def get_auth_oidc(account, vo='def', **kwargs):
     """
     # no permission layer for the moment !
 
+    vo = map_vo(vo)
     account = InternalAccount(account, vo=vo)
     return oidc.get_auth_oidc(account, **kwargs)
 
@@ -140,6 +142,7 @@ def get_auth_token_user_pass(account, username, password, appid, ip=None, vo='de
     :returns: A models.Token object as saved to the database.
     """
 
+    vo = map_vo(vo)
     kwargs = {'account': account, 'username': username, 'password': password}
     if not permission.has_permission(issuer=account, vo=vo, action='get_auth_token_user_pass', kwargs=kwargs):
         raise exception.AccessDenied('User with identity %s can not log to account %s' % (username, account))
@@ -164,6 +167,7 @@ def get_auth_token_gss(account, gsscred, appid, ip=None, vo='def'):
     :returns: A models.Token object as saved to the database.
     """
 
+    vo = map_vo(vo)
     kwargs = {'account': account, 'gsscred': gsscred}
     if not permission.has_permission(issuer=account, vo=vo, action='get_auth_token_gss', kwargs=kwargs):
         raise exception.AccessDenied('User with identity %s can not log to account %s' % (gsscred, account))
@@ -188,6 +192,7 @@ def get_auth_token_x509(account, dn, appid, ip=None, vo='def'):
     :returns: A models.Token object as saved to the database.
     """
 
+    vo = map_vo(vo)
     if account is None:
         account = identity.get_default_account(dn, IdentityType.X509).external
 
@@ -215,6 +220,7 @@ def get_auth_token_ssh(account, signature, appid, ip=None, vo='def'):
     :returns: A models.Token object as saved to the database.
     """
 
+    vo = map_vo(vo)
     kwargs = {'account': account, 'signature': signature}
     if not permission.has_permission(issuer=account, vo=vo, action='get_auth_token_ssh', kwargs=kwargs):
         raise exception.AccessDenied('User with provided signature can not log to account %s' % account)
@@ -238,6 +244,7 @@ def get_ssh_challenge_token(account, appid, ip=None, vo='def'):
     :returns: A models.Token object as saved to the database.
     """
 
+    vo = map_vo(vo)
     kwargs = {'account': account}
     if not permission.has_permission(issuer=account, vo=vo, action='get_ssh_challenge_token', kwargs=kwargs):
         raise exception.AccessDenied('User can not get challenge token for account %s' % account)
@@ -261,6 +268,7 @@ def get_auth_token_saml(account, saml_nameid, appid, ip=None, vo='def'):
     :returns: A models.Token object as saved to the database.
     """
 
+    vo = map_vo(vo)
     kwargs = {'account': account, 'saml_nameid': saml_nameid}
     if not permission.has_permission(issuer=account, vo=vo, action='get_auth_token_saml', kwargs=kwargs):
         raise exception.AccessDenied('User with identity %s can not log to account %s' % (saml_nameid, account))

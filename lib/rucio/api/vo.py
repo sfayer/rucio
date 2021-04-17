@@ -22,6 +22,7 @@ from rucio.api.permission import has_permission
 from rucio.common import exception
 from rucio.common.schema import validate_schema
 from rucio.common.types import InternalAccount
+from rucio.common.utils import map_vo
 from rucio.core import identity
 from rucio.core import vo as vo_core
 from rucio.db.sqla.constants import IdentityType
@@ -37,6 +38,9 @@ def add_vo(new_vo, issuer, description=None, email=None, vo='def'):
     :param issuer: The user issuing the command.
     :param vo: The vo of the user issuing the command.
     '''
+    vo = map_vo(vo)
+    # Allow long VO name to be used on add command if already defined in config!
+    new_vo = map_vo(new_vo)
 
     validate_schema('vo', new_vo, vo=vo)
 
@@ -54,6 +58,7 @@ def list_vos(issuer, vo='def'):
     :param issuer: The user issuing the command.
     :param vo: The vo of the user issuing the command.
     '''
+    vo = map_vo(vo)
     kwargs = {}
     if not has_permission(issuer=issuer, action='list_vos', kwargs=kwargs, vo=vo):
         raise exception.AccessDenied('Account {} cannot list VOs'.format(issuer))
@@ -74,6 +79,8 @@ def recover_vo_root_identity(root_vo, identity_key, id_type, email, issuer, defa
     :param password: Password if id_type is userpass.
     :param vo: the VO to act on.
     """
+    vo = map_vo(vo)
+    root_vo = map_vo(root_vo)
     kwargs = {}
     if not has_permission(issuer=issuer, vo=vo, action='recover_vo_root_identity', kwargs=kwargs):
         raise exception.AccessDenied('Account %s can not recover root identity' % (issuer))
@@ -92,6 +99,8 @@ def update_vo(updated_vo, parameters, issuer, vo='def'):
     :param issuer: The user issuing the command.
     :param vo: The VO of the user issusing the command.
     """
+    vo = map_vo(vo)
+    updated_vo = map_vo(updated_vo)
     kwargs = {}
     if not has_permission(issuer=issuer, action='update_vo', kwargs=kwargs, vo=vo):
         raise exception.AccessDenied('Account {} cannot update VO'.format(issuer))

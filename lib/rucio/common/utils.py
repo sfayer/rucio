@@ -73,7 +73,7 @@ from xml.etree import ElementTree
 import requests
 from six import string_types, text_type, PY3
 
-from rucio.common.config import config_get
+from rucio.common.config import config_get, config_get_options, config_has_section
 from rucio.common.exception import MissingModuleException, InvalidType, InputValidationError, MetalinkJsonParsingError, RucioException
 from rucio.common.types import InternalAccount, InternalScope
 
@@ -1413,6 +1413,23 @@ def setup_logger(module_name=None, logger_name=None, logger_level=None, verbose=
         add_handler(logger)
 
     return logger
+
+
+def map_vo(vo):
+    """
+    Converts a long VO name into the internal short (three letter)
+    tag mapping. If a mapping is not found, the orignal is returned unchanged.
+
+    :param vo: The long VO name string.
+
+    :returns: The short VO name string.
+    """
+    if not config_has_section("vo-map"):
+        return vo  # No mapping config
+    vo_maps = config_get_options("vo-map")
+    if vo in vo_maps:
+        return config_get("vo-map", vo)
+    return vo
 
 
 class retry:

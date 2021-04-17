@@ -17,7 +17,7 @@ from rucio.api import permission
 from rucio.core import lifetime_exception
 from rucio.common import exception
 from rucio.common.types import InternalAccount, InternalScope
-from rucio.common.utils import api_update_return_dict
+from rucio.common.utils import api_update_return_dict, map_vo
 
 
 def list_exceptions(exception_id=None, states=None, vo='def'):
@@ -29,6 +29,7 @@ def list_exceptions(exception_id=None, states=None, vo='def'):
     :param vo:         The VO to act on
     """
 
+    vo = map_vo(vo)
     exceptions = lifetime_exception.list_exceptions(exception_id=exception_id, states=states)
     for e in exceptions:
         if vo == e['scope'].vo:
@@ -49,6 +50,7 @@ def add_exception(dids, account, pattern, comments, expires_at, vo='def'):
     returns:            The id of the exception.
     """
 
+    vo = map_vo(vo)
     account = InternalAccount(account, vo=vo)
     for d in dids:
         d['scope'] = InternalScope(d['scope'], vo=vo)
@@ -64,6 +66,7 @@ def update_exception(exception_id, state, issuer, vo='def'):
     :param issuer:     The issuer account.
     :param vo:         The VO to act on.
     """
+    vo = map_vo(vo)
     kwargs = {'exception_id': exception_id, 'vo': vo}
     if not permission.has_permission(issuer=issuer, vo=vo, action='update_lifetime_exceptions', kwargs=kwargs):
         raise exception.AccessDenied('Account %s can not update lifetime exceptions' % (issuer))

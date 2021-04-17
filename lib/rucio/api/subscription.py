@@ -25,6 +25,7 @@ from rucio.api.permission import has_permission
 from rucio.common.exception import InvalidObject, AccessDenied
 from rucio.common.schema import validate_schema
 from rucio.common.types import InternalAccount, InternalScope
+from rucio.common.utils import map_vo
 from rucio.core import subscription
 
 
@@ -58,6 +59,7 @@ def add_subscription(name, account, filter, replication_rules, comments, lifetim
     :returns: subscription_id
     :rtype:   String
     """
+    vo = map_vo(vo)
     if not has_permission(issuer=issuer, vo=vo, action='add_subscription', kwargs={'account': account}):
         raise AccessDenied('Account %s can not add subscription' % (issuer))
     try:
@@ -106,6 +108,7 @@ def update_subscription(name, account, metadata=None, issuer=None, vo='def'):
     :type vo: String
     :raises: SubscriptionNotFound if subscription is not found
     """
+    vo = map_vo(vo)
     if not has_permission(issuer=issuer, vo=vo, action='update_subscription', kwargs={'account': account}):
         raise AccessDenied('Account %s can not update subscription' % (issuer))
     try:
@@ -159,6 +162,7 @@ def list_subscriptions(name=None, account=None, state=None, vo='def'):
     :raises: exception.NotFound if subscription is not found
     """
 
+    vo = map_vo(vo)
     if account:
         account = InternalAccount(account, vo=vo)
     else:
@@ -188,6 +192,7 @@ def list_subscription_rule_states(name=None, account=None, vo='def'):
     :param vo: The VO to act on.
     :returns: List with tuple (account, name, state, count)
     """
+    vo = map_vo(vo)
     if account is not None:
         account = InternalAccount(account, vo=vo)
     else:
@@ -209,7 +214,7 @@ def delete_subscription(subscription_id, vo='def'):
     :param vo: The VO of the user issuing command
     :type subscription_id:  String
     """
-
+    vo = map_vo(vo)  # Just so it's not forgotten if this is implemented
     raise NotImplementedError
 
 
@@ -222,6 +227,7 @@ def get_subscription_by_id(subscription_id, vo='def'):
 
     :raises: SubscriptionNotFound if no Subscription can be found.
     """
+    vo = map_vo(vo)
     sub = subscription.get_subscription_by_id(subscription_id)
     if sub['account'].vo != vo:
         raise AccessDenied('Unable to get subscription')

@@ -234,3 +234,9 @@ admin_issuer = wlcg
 
 [api]
 endpoints = accountlimits, accounts, config, credentials, dids, export, heartbeats, identities, import, lifetime_exceptions, locks, meta, ping, redirect, replicas, requests, rses, rules, scopes, subscriptions, traces, vos
+
+# Optional server-side section for mapping long VO names to 3-letter tokens
+# in multi-VO configs
+# [vo-map]
+# my.long.vo = mlv
+# another.vo = ant

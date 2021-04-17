@@ -22,6 +22,7 @@ from rucio.api import permission
 from rucio.common import exception
 from rucio.core import exporter
 from rucio.core.rse import get_rse_name
+from rucio.common.utils import map_vo
 
 
 def export_data(issuer, distance=True, vo='def'):
@@ -32,6 +33,7 @@ def export_data(issuer, distance=True, vo='def'):
     :param distance: To enable the reporting of distance.
     :param vo: the VO of the issuer.
     """
+    vo = map_vo(vo)
     kwargs = {'issuer': issuer}
     if not permission.has_permission(issuer=issuer, vo=vo, action='export', kwargs=kwargs):
         raise exception.AccessDenied('Account %s can not export data' % issuer)

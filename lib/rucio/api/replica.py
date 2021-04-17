@@ -34,7 +34,7 @@ from rucio.core.rse import get_rse_id, get_rse_name
 from rucio.common import exception
 from rucio.common.schema import validate_schema
 from rucio.common.types import InternalAccount, InternalScope
-from rucio.common.utils import api_update_return_dict
+from rucio.common.utils import api_update_return_dict, map_vo
 
 
 def get_bad_replicas_summary(rse_expression=None, from_date=None, to_date=None, vo='def'):
@@ -45,6 +45,7 @@ def get_bad_replicas_summary(rse_expression=None, from_date=None, to_date=None, 
     :param to_date: The end date.
     :param vo: the VO to act on.
     """
+    vo = map_vo(vo)
     replicas = replica.get_bad_replicas_summary(rse_expression=rse_expression, from_date=from_date, to_date=to_date, filter={'vo': vo})
     return [api_update_return_dict(r) for r in replicas]
 
@@ -59,6 +60,7 @@ def list_bad_replicas_status(state=BadFilesStatus.BAD, rse=None, younger_than=No
     :param limit: The maximum number of replicas returned.
     :param vo: The VO to act on.
     """
+    vo = map_vo(vo)
     rse_id = None
     if rse is not None:
         rse_id = get_rse_id(rse=rse, vo=vo)
@@ -77,6 +79,7 @@ def declare_bad_file_replicas(pfns, reason, issuer, vo='def'):
     :param issuer: The issuer account.
     :param vo: The VO to act on.
     """
+    vo = map_vo(vo)
     kwargs = {}
     if not permission.has_permission(issuer=issuer, vo=vo, action='declare_bad_file_replicas', kwargs=kwargs):
         raise exception.AccessDenied('Account %s can not declare bad replicas' % (issuer))
@@ -103,6 +106,7 @@ def declare_suspicious_file_replicas(pfns, reason, issuer, vo='def'):
     :param issuer: The issuer account.
     :param vo: The VO to act on.
     """
+    vo = map_vo(vo)
     kwargs = {}
     if not permission.has_permission(issuer=issuer, vo=vo, action='declare_suspicious_file_replicas', kwargs=kwargs):
         raise exception.AccessDenied('Account %s can not declare suspicious replicas' % (issuer))
@@ -130,6 +134,7 @@ def get_did_from_pfns(pfns, rse, vo='def'):
     :param vo: The VO to act on.
     :returns: A dictionary {pfn: {'scope': scope, 'name': name}}
     """
+    vo = map_vo(vo)
     rse_id = get_rse_id(rse=rse, vo=vo)
     replicas = replica.get_did_from_pfns(pfns=pfns, rse_id=rse_id, vo=vo)
 
@@ -163,6 +168,7 @@ def list_replicas(dids, schemes=None, unavailable=False, request_id=None,
     :param issuer: The issuer account.
     :param vo: The VO to act on.
     """
+    vo = map_vo(vo)
     validate_schema(name='r_dids', obj=dids, vo=vo)
 
     # Allow selected authenticated users to retrieve signed URLs.
@@ -219,6 +225,7 @@ def add_replicas(rse, files, issuer, ignore_availability=False, vo='def'):
 
     :returns: True is successful, False otherwise
     """
+    vo = map_vo(vo)
     for v_file in files:
         v_file.update({"type": "FILE"})  # Make sure DIDs are identified as files for checking
     validate_schema(name='dids', obj=files, vo=vo)
@@ -252,6 +259,7 @@ def delete_replicas(rse, files, issuer, ignore_availability=False, vo='def'):
 
     :returns: True is successful, False otherwise
     """
+    vo = map_vo(vo)
     validate_schema(name='r_dids', obj=files, vo=vo)
 
     rse_id = get_rse_id(rse=rse, vo=vo)
@@ -277,6 +285,7 @@ def update_replicas_states(rse, files, issuer, vo='def'):
     :param issuer: The issuer account.
     :param vo: The VO to act on.
     """
+    vo = map_vo(vo)
     for v_file in files:
         v_file.update({"type": "FILE"})  # Make sure DIDs are identified as files for checking
     validate_schema(name='dids', obj=files, vo=vo)
@@ -305,6 +314,7 @@ def list_dataset_replicas(scope, name, deep=False, vo='def'):
     :returns: A list of dict dataset replicas
     """
 
+    vo = map_vo(vo)
     scope = InternalScope(scope, vo=vo)
 
     replicas = replica.list_dataset_replicas(scope=scope, name=name, deep=deep)
@@ -322,6 +332,7 @@ def list_dataset_replicas_bulk(dids, vo='def'):
     :returns: A list of dict dataset replicas
     """
 
+    vo = map_vo(vo)
     validate_schema(name='r_dids', obj=dids, vo=vo)
     names_by_scope = dict()
     for d in dids:
@@ -353,6 +364,7 @@ def list_dataset_replicas_vp(scope, name, deep=False, vo='def'):
     NOTICE: This is an RnD function and might change or go away at any time.
     """
 
+    vo = map_vo(vo)
     scope = InternalScope(scope, vo=vo)
     for r in replica.list_dataset_replicas_vp(scope=scope, name=name, deep=deep):
         yield api_update_return_dict(r)
@@ -370,6 +382,7 @@ def list_datasets_per_rse(rse, filters={}, limit=None, vo='def'):
     :returns: A list of dict dataset replicas
     """
 
+    vo = map_vo(vo)
     rse_id = get_rse_id(rse=rse, vo=vo)
     if 'scope' in filters:
         filters['scope'] = InternalScope(filters['scope'], vo=vo)
@@ -392,6 +405,7 @@ def add_bad_pfns(pfns, issuer, state, reason=None, expires_at=None, vo='def'):
 
     :returns: True is successful.
     """
+    vo = map_vo(vo)
     kwargs = {'state': state}
     if not permission.has_permission(issuer=issuer, vo=vo, action='add_bad_pfns', kwargs=kwargs):
         raise exception.AccessDenied('Account %s can not declare bad PFNs' % (issuer))
@@ -415,6 +429,7 @@ def add_bad_dids(dids, rse, issuer, state, reason=None, expires_at=None, vo='def
 
     :returns: The list of replicas not declared bad
     """
+    vo = map_vo(vo)
     kwargs = {'state': state}
     if not permission.has_permission(issuer=issuer, vo=vo, action='add_bad_pfns', kwargs=kwargs):
         raise exception.AccessDenied('Account %s can not declare bad PFN or DIDs' % issuer)
@@ -433,6 +448,7 @@ def get_suspicious_files(rse_expression, younger_than=None, nattempts=None, vo='
     :param nattempts: The number of time the replicas have been declared suspicious
     :param vo: The VO to act on.
     """
+    vo = map_vo(vo)
     replicas = replica.get_suspicious_files(rse_expression=rse_expression, younger_than=younger_than, nattempts=nattempts, filter={'vo': vo})
     return [api_update_return_dict(r) for r in replicas]
 
@@ -448,6 +464,7 @@ def set_tombstone(rse, scope, name, issuer, vo='def'):
     :param vo: The VO to act on.
     """
 
+    vo = map_vo(vo)
     rse_id = get_rse_id(rse, vo=vo)
 
     if not permission.has_permission(issuer=issuer, vo=vo, action='set_tombstone', kwargs={}):

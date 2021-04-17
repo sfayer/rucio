@@ -19,6 +19,7 @@ import rucio.common.exception
 from rucio.core import scope as core_scope
 from rucio.common.types import InternalAccount, InternalScope
 from rucio.common.schema import validate_schema
+from rucio.common.utils import map_vo
 
 
 def list_scopes(filter={}, vo='def'):
@@ -30,6 +31,7 @@ def list_scopes(filter={}, vo='def'):
 
     :returns: A list containing all scopes.
     """
+    vo = map_vo(vo)
     # If filter is empty, create a new dict to avoid overwriting the function's default
     if not filter:
         filter = {}
@@ -51,6 +53,7 @@ def add_scope(scope, account, issuer, vo='def'):
     :param vo: The VO to act on.
     """
 
+    vo = map_vo(vo)
     validate_schema(name='scope', obj=scope, vo=vo)
 
     kwargs = {'scope': scope, 'account': account}
@@ -73,6 +76,7 @@ def get_scopes(account, vo='def'):
     :returns: A list containing the names of all scopes for this account.
     """
 
+    vo = map_vo(vo)
     account = InternalAccount(account, vo=vo)
 
     return [scope.external for scope in core_scope.get_scopes(account)]

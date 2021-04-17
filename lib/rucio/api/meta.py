@@ -13,6 +13,7 @@
 
 from rucio.api.permission import has_permission
 from rucio.common.exception import AccessDenied
+from rucio.common.utils import map_vo
 from rucio.core import meta
 
 
@@ -48,6 +49,7 @@ def add_key(key, key_type, issuer, value_type=None, value_regexp=None, vo='def')
     :param value_regexp: the regular expression that values should match, if defined.
     :param vo: The vo to act on
     """
+    vo = map_vo(vo)
     kwargs = {'key': key, 'key_type': key_type, 'value_type': value_type, 'value_regexp': value_regexp}
     if not has_permission(issuer=issuer, vo=vo, action='add_key', kwargs=kwargs):
         raise AccessDenied('Account %s can not add key' % (issuer))
@@ -62,6 +64,7 @@ def add_value(key, value, issuer, vo='def'):
     :param value: the value.
     :param vo: the vo to act on.
     """
+    vo = map_vo(vo)
     kwargs = {'key': key, 'value': value}
     if not has_permission(issuer=issuer, vo=vo, action='add_value', kwargs=kwargs):
         raise AccessDenied('Account %s can not add value %s to key %s' % (issuer, value, key))

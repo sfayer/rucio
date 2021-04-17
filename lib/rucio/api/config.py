@@ -15,6 +15,7 @@
 from rucio.api import permission
 from rucio.common import exception
 from rucio.core import config
+from rucio.common.utils import map_vo
 
 """
 ConfigParser compatible interface.
@@ -33,6 +34,7 @@ def sections(issuer=None, vo='def'):
     :returns: ['section_name', ...]
     """
 
+    vo = map_vo(vo)
     kwargs = {'issuer': issuer}
     if not permission.has_permission(issuer=issuer, vo=vo, action='config_sections', kwargs=kwargs):
         raise exception.AccessDenied('%s cannot retrieve sections' % issuer)
@@ -48,6 +50,7 @@ def add_section(section, issuer=None, vo='def'):
     :param vo: The VO to act on.
     """
 
+    vo = map_vo(vo)
     kwargs = {'issuer': issuer, 'section': section}
     if not permission.has_permission(issuer=issuer, vo=vo, action='config_add_section', kwargs=kwargs):
         raise exception.AccessDenied('%s cannot add section %s' % (issuer, section))
@@ -64,6 +67,7 @@ def has_section(section, issuer=None, vo='def'):
     :returns: True/False
     """
 
+    vo = map_vo(vo)
     kwargs = {'issuer': issuer, 'section': section}
     if not permission.has_permission(issuer=issuer, vo=vo, action='config_has_section', kwargs=kwargs):
         raise exception.AccessDenied('%s cannot check existence of section %s' % (issuer, section))
@@ -80,6 +84,7 @@ def options(section, issuer=None, vo='def'):
     :returns: ['option', ...]
     """
 
+    vo = map_vo(vo)
     kwargs = {'issuer': issuer, 'section': section}
     if not permission.has_permission(issuer=issuer, vo=vo, action='config_options', kwargs=kwargs):
         raise exception.AccessDenied('%s cannot retrieve options from section %s' % (issuer, section))
@@ -97,6 +102,7 @@ def has_option(section, option, issuer=None, vo='def'):
     :returns: True/False
     """
 
+    vo = map_vo(vo)
     kwargs = {'issuer': issuer, 'section': section, 'option': option}
     if not permission.has_permission(issuer=issuer, vo=vo, action='config_has_option', kwargs=kwargs):
         raise exception.AccessDenied('%s cannot check existence of option %s from section %s' % (issuer, option, section))
@@ -117,6 +123,7 @@ def get(section, option, issuer=None, vo='def'):
     :returns: The auto-coerced value.
     """
 
+    vo = map_vo(vo)
     kwargs = {'issuer': issuer, 'section': section, 'option': option}
     if not permission.has_permission(issuer=issuer, vo=vo, action='config_get', kwargs=kwargs):
         raise exception.AccessDenied('%s cannot retrieve option %s from section %s' % (issuer, option, section))
@@ -134,6 +141,7 @@ def items(section, issuer=None, vo='def'):
     :returns: [('option', auto-coerced value), ...]
     """
 
+    vo = map_vo(vo)
     kwargs = {'issuer': issuer, 'section': section}
     if not permission.has_permission(issuer=issuer, vo=vo, action='config_items', kwargs=kwargs):
         raise exception.AccessDenied('%s cannot retrieve options and values from section %s' % (issuer, section))
@@ -151,6 +159,7 @@ def set(section, option, value, issuer=None, vo='def'):
     :param vo: The VO to act on.
     """
 
+    vo = map_vo(vo)
     kwargs = {'issuer': issuer, 'section': section, 'option': option, 'value': value}
     if not permission.has_permission(issuer=issuer, vo=vo, action='config_set', kwargs=kwargs):
         raise exception.AccessDenied('%s cannot set option %s to %s in section %s' % (issuer, option, value, section))
@@ -167,6 +176,7 @@ def remove_section(section, issuer=None, vo='def'):
     :returns: True/False.
     """
 
+    vo = map_vo(vo)
     kwargs = {'issuer': issuer, 'section': section}
     if not permission.has_permission(issuer=issuer, vo=vo, action='config_remove_section', kwargs=kwargs):
         raise exception.AccessDenied('%s cannot remove section %s' % (issuer, section))
@@ -184,6 +194,7 @@ def remove_option(section, option, issuer=None, vo='def'):
     :returns: True/False
     """
 
+    vo = map_vo(vo)
     kwargs = {'issuer': issuer, 'section': section, 'option': option}
     if not permission.has_permission(issuer=issuer, vo=vo, action='config_remove_option', kwargs=kwargs):
         raise exception.AccessDenied('%s cannot remove option %s from section %s' % (issuer, option, section))

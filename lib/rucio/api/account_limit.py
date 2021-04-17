@@ -17,7 +17,7 @@
 import rucio.api.permission
 import rucio.common.exception
 
-from rucio.common.utils import api_update_return_dict
+from rucio.common.utils import api_update_return_dict, map_vo
 from rucio.common.types import InternalAccount
 
 from rucio.core import account_limit as account_limit_core
@@ -33,6 +33,7 @@ def get_rse_account_usage(rse, vo='def'):
     :param vo:       The VO to act on.
     :return:         List of dictionnaries.
     """
+    vo = map_vo(vo)
     rse_id = get_rse_id(rse=rse, vo=vo)
 
     return [api_update_return_dict(d) for d in account_limit_core.get_rse_account_usage(rse_id=rse_id)]
@@ -50,6 +51,7 @@ def get_local_account_limits(account, vo='def'):
     :returns: The account limits.
     """
 
+    vo = map_vo(vo)
     account = InternalAccount(account, vo=vo)
 
     rse_instead_id = {}
@@ -71,6 +73,7 @@ def get_local_account_limit(account, rse, vo='def'):
     :returns: The account limit.
     """
 
+    vo = map_vo(vo)
     account = InternalAccount(account, vo=vo)
 
     rse_id = get_rse_id(rse=rse, vo=vo)
@@ -88,6 +91,7 @@ def get_global_account_limits(account, vo='def'):
 
     :returns: The account limits.
     """
+    vo = map_vo(vo)
     if account:
         account = InternalAccount(account, vo=vo)
     else:
@@ -109,6 +113,7 @@ def get_global_account_limit(account, rse_expression, vo='def'):
     :returns: The account limit.
     """
 
+    vo = map_vo(vo)
     account = InternalAccount(account, vo=vo)
 
     return {rse_expression: account_limit_core.get_global_account_limit(account=account, rse_expression=rse_expression)}
@@ -124,6 +129,7 @@ def set_local_account_limit(account, rse, bytes, issuer, vo='def'):
     :param issuer:  The issuer account_core.
     :param vo:      The VO to act on.
     """
+    vo = map_vo(vo)
     rse_id = get_rse_id(rse=rse, vo=vo)
 
     kwargs = {'account': account, 'rse': rse, 'rse_id': rse_id, 'bytes': bytes}
@@ -149,6 +155,7 @@ def set_global_account_limit(account, rse_expression, bytes, issuer, vo='def'):
     :param vo:              The VO to act on.
     """
 
+    vo = map_vo(vo)
     kwargs = {'account': account, 'rse_expression': rse_expression, 'bytes': bytes}
     if not rucio.api.permission.has_permission(issuer=issuer, vo=vo, action='set_global_account_limit', kwargs=kwargs):
         raise rucio.common.exception.AccessDenied('Account %s can not set account limits.' % (issuer))
@@ -173,6 +180,7 @@ def delete_local_account_limit(account, rse, issuer, vo='def'):
     :returns: True if successful; False otherwise.
     """
 
+    vo = map_vo(vo)
     rse_id = get_rse_id(rse=rse, vo=vo)
     kwargs = {'account': account, 'rse': rse, 'rse_id': rse_id}
     if not rucio.api.permission.has_permission(issuer=issuer, vo=vo, action='delete_local_account_limit', kwargs=kwargs):
@@ -198,6 +206,7 @@ def delete_global_account_limit(account, rse_expression, issuer, vo='def'):
     :returns: True if successful; False otherwise.
     """
 
+    vo = map_vo(vo)
     kwargs = {'account': account, 'rse_expression': rse_expression}
     if not rucio.api.permission.has_permission(issuer=issuer, vo=vo, action='delete_global_account_limit', kwargs=kwargs):
         raise rucio.common.exception.AccessDenied('Account %s can not delete global account limits.' % (issuer))
@@ -222,6 +231,7 @@ def get_local_account_usage(account, rse, issuer, vo='def'):
     :returns:        List of dicts {'rse_id', 'bytes_used', 'files_used', 'bytes_limit'}
     """
 
+    vo = map_vo(vo)
     rse_id = None
 
     if rse:
@@ -250,6 +260,7 @@ def get_global_account_usage(account, rse_expression, issuer, vo='def'):
     :returns:        List of dicts {'rse_id', 'bytes_used', 'files_used', 'bytes_limit'}
     """
 
+    vo = map_vo(vo)
     kwargs = {'account': account, 'rse_expression': rse_expression}
     if not rucio.api.permission.has_permission(issuer=issuer, vo=vo, action='get_global_account_usage', kwargs=kwargs):
         raise rucio.common.exception.AccessDenied('Account %s can not list global account usage.' % (issuer))

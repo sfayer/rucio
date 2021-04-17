@@ -28,8 +28,9 @@ from re import match
 import pytest
 
 from rucio.common.exception import InvalidType
-from rucio.common.utils import md5, adler32, parse_did_filter_from_string
+from rucio.common.utils import md5, adler32, parse_did_filter_from_string, map_vo
 from rucio.common.logging import formatted_logger
+from rucio.common.config import config_add_section, config_set
 
 
 class TestUtils(unittest.TestCase):
@@ -90,6 +91,19 @@ class TestUtils(unittest.TestCase):
             input = 'type=g'
             parse_did_filter_from_string(input)
 
+    def test_vo_map(self):
+        """(COMMON/UTILS): test vo_map"""
+        # Add some mappings to the config
+        config_add_section("vo-map")
+        config_set("vo-map", "test.vo-one", "tst")
+        config_set("vo-map", "second.vo", "ts2")
+        # Mapping not in config
+        assert map_vo("test") == "test"
+        # VO in config, but use short name directly
+        assert map_vo("tst") == "tst"
+        # Test two mappings from config
+        assert map_vo("test.vo-one") == "tst"
+        assert map_vo("second.vo") == "ts2"
 
 def test_formatted_logger():
     result = None

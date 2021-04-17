@@ -31,7 +31,7 @@ import rucio.core.identity
 from rucio.core import account as account_core
 from rucio.core.rse import get_rse_id
 from rucio.common.schema import validate_schema
-from rucio.common.utils import api_update_return_dict
+from rucio.common.utils import api_update_return_dict, map_vo
 from rucio.common.types import InternalAccount
 from rucio.db.sqla.constants import AccountType
 
@@ -49,6 +49,7 @@ def add_account(account, type, email, issuer, vo='def'):
 
     """
 
+    vo = map_vo(vo)
     validate_schema(name='account', obj=account, vo=vo)
 
     kwargs = {'account': account, 'type': type}
@@ -69,6 +70,7 @@ def del_account(account, issuer, vo='def'):
     :param vo: The VO to act on.
 
     """
+    vo = map_vo(vo)
     kwargs = {'account': account}
     if not rucio.api.permission.has_permission(issuer=issuer, vo=vo, action='del_account', kwargs=kwargs):
         raise rucio.common.exception.AccessDenied('Account %s can not delete account' % (issuer))
@@ -87,6 +89,7 @@ def get_account_info(account, vo='def'):
     :param vo: The VO to act on.
     """
 
+    vo = map_vo(vo)
     account = InternalAccount(account, vo=vo)
 
     acc = account_core.get_account(account)
@@ -103,6 +106,7 @@ def update_account(account, key, value, issuer='root', vo='def'):
     :param issuer: The issuer account
     :param vo: The VO to act on.
     """
+    vo = map_vo(vo)
     validate_schema(name='account', obj=account, vo=vo)
     kwargs = {}
     if not rucio.api.permission.has_permission(issuer=issuer, vo=vo, action='update_account', kwargs=kwargs):
@@ -124,6 +128,7 @@ def list_accounts(filter={}, vo='def'):
 
     :returns: List of all accounts.
     """
+    vo = map_vo(vo)
     # If filter is empty, create a new dict to avoid overwriting the function's default
     if not filter:
         filter = {}
@@ -145,6 +150,7 @@ def account_exists(account, vo='def'):
     :returns: True if found, otherwise false.
     """
 
+    vo = map_vo(vo)
     account = InternalAccount(account, vo=vo)
 
     return account_core.account_exists(account)
@@ -158,6 +164,7 @@ def list_identities(account, vo='def'):
     :param vo: The VO to act on.
     """
 
+    vo = map_vo(vo)
     account = InternalAccount(account, vo=vo)
 
     return account_core.list_identities(account)
@@ -171,6 +178,7 @@ def list_account_attributes(account, vo='def'):
     :param vo: The VO to act on
     """
 
+    vo = map_vo(vo)
     account = InternalAccount(account, vo=vo)
 
     return account_core.list_account_attributes(account)
@@ -186,6 +194,7 @@ def add_account_attribute(key, value, account, issuer, vo='def'):
     :param issuer: The issuer account.
     :param vo: The VO to act on.
     """
+    vo = map_vo(vo)
     validate_schema(name='account_attribute', obj=key, vo=vo)
     validate_schema(name='account_attribute', obj=value, vo=vo)
 
@@ -207,6 +216,7 @@ def del_account_attribute(key, account, issuer, vo='def'):
     :param issuer: The issuer account.
     :param vo: The VO to act on.
     """
+    vo = map_vo(vo)
     kwargs = {'account': account, 'key': key}
     if not rucio.api.permission.has_permission(issuer=issuer, vo=vo, action='del_attribute', kwargs=kwargs):
         raise rucio.common.exception.AccessDenied('Account %s can not delete attribute' % (issuer))
@@ -226,6 +236,7 @@ def get_usage(rse, account, issuer, vo='def'):
     :param vo:               The VO to act on.
     :returns:                A dictionary with total and bytes.
     """
+    vo = map_vo(vo)
     rse_id = get_rse_id(rse=rse, vo=vo)
     account = InternalAccount(account, vo=vo)
 
@@ -242,6 +253,7 @@ def get_usage_history(rse, account, issuer, vo='def'):
     :param vo:               The VO to act on.
     :returns:                A dictionary with total and bytes.
     """
+    vo = map_vo(vo)
     rse_id = get_rse_id(rse=rse, vo=vo)
     account = InternalAccount(account, vo=vo)
 

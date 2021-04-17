@@ -19,7 +19,7 @@ Interface for the requests abstraction layer
 from rucio.api import permission
 from rucio.common import exception
 from rucio.common.types import InternalAccount, InternalScope
-from rucio.common.utils import api_update_return_dict
+from rucio.common.utils import api_update_return_dict, map_vo
 from rucio.core import request
 from rucio.core.rse import get_rse_id
 
@@ -34,6 +34,7 @@ def queue_requests(requests, issuer, vo='def'):
     :returns: List of Request-IDs as 32 character hex strings
     """
 
+    vo = map_vo(vo)
     kwargs = {'requests': requests, 'issuer': issuer}
     if not permission.has_permission(issuer=issuer, vo=vo, action='queue_requests', kwargs=kwargs):
         raise exception.AccessDenied('%(issuer)s can not queue request' % locals())
@@ -58,6 +59,7 @@ def query_request(request_id, issuer, account, vo='def'):
     :returns: Request status information as a dictionary.
     """
 
+    vo = map_vo(vo)
     kwargs = {'account': account, 'issuer': issuer, 'request_id': request_id}
     if not permission.has_permission(issuer=issuer, vo=vo, action='query_request', kwargs=kwargs):
         raise exception.AccessDenied('%s cannot query request %s' % (account, request_id))
@@ -75,6 +77,7 @@ def cancel_request(request_id, issuer, account, vo='def'):
     :param vo: The VO to act on.
     """
 
+    vo = map_vo(vo)
     kwargs = {'account': account, 'issuer': issuer, 'request_id': request_id}
     if not permission.has_permission(issuer=issuer, vo=vo, action='cancel_request_', kwargs=kwargs):
         raise exception.AccessDenied('%s cannot cancel request %s' % (account, request_id))
@@ -95,6 +98,7 @@ def cancel_request_did(scope, name, dest_rse, request_type, issuer, account, vo=
     :param vo: The VO to act on.
     """
 
+    vo = map_vo(vo)
     dest_rse_id = get_rse_id(rse=dest_rse, vo=vo)
 
     kwargs = {'account': account, 'issuer': issuer}
@@ -117,6 +121,7 @@ def get_next(request_type, state, issuer, account, vo='def'):
     :returns: Request as a dictionary.
     """
 
+    vo = map_vo(vo)
     kwargs = {'account': account, 'issuer': issuer, 'request_type': request_type, 'state': state}
     if not permission.has_permission(issuer=issuer, vo=vo, action='get_next', kwargs=kwargs):
         raise exception.AccessDenied('%(account)s cannot get the next request of type %(request_type)s in state %(state)s' % locals())
@@ -136,6 +141,7 @@ def get_request_by_did(scope, name, rse, issuer, vo='def'):
     :param vo: The VO to act on.
     :returns: Request as a dictionary.
     """
+    vo = map_vo(vo)
     rse_id = get_rse_id(rse=rse, vo=vo)
 
     kwargs = {'scope': scope, 'name': name, 'rse': rse, 'rse_id': rse_id, 'issuer': issuer}
@@ -157,6 +163,7 @@ def list_requests(src_rses, dst_rses, states, issuer, vo='def'):
     :param states: list of request states.
     :param issuer: Issuing account as a string.
     """
+    vo = map_vo(vo)
     src_rse_ids = [get_rse_id(rse=rse, vo=vo) for rse in src_rses]
     dst_rse_ids = [get_rse_id(rse=rse, vo=vo) for rse in dst_rses]
 

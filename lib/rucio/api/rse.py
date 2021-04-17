@@ -30,7 +30,7 @@
 from rucio.api import permission
 from rucio.common import exception
 from rucio.common.schema import validate_schema
-from rucio.common.utils import api_update_return_dict
+from rucio.common.utils import api_update_return_dict, map_vo
 from rucio.core import distance as distance_module
 from rucio.core import rse as rse_module
 from rucio.core.rse_expression_parser import parse_expression
@@ -61,6 +61,7 @@ def add_rse(rse, issuer, vo='def', deterministic=True, volatile=False, city=None
     :param ASN: Access service network.
     :param availability: Availability.
     """
+    vo = map_vo(vo)
     validate_schema(name='rse', obj=rse, vo=vo)
     kwargs = {'rse': rse}
     if not permission.has_permission(issuer=issuer, vo=vo, action='add_rse', kwargs=kwargs):
@@ -84,6 +85,7 @@ def get_rse(rse, vo='def'):
     :raises RSENotFound: if the referred RSE was not found in the database
     """
 
+    vo = map_vo(vo)
     rse_id = rse_module.get_rse_id(rse=rse, vo=vo)
     return rse_module.get_rse_protocols(rse_id=rse_id)
 
@@ -96,6 +98,7 @@ def del_rse(rse, issuer, vo='def'):
     :param issuer: The issuer account.
     :param vo: The VO to act on.
     """
+    vo = map_vo(vo)
     rse_id = rse_module.get_rse_id(rse=rse, vo=vo)
 
     kwargs = {'rse': rse, 'rse_id': rse_id}
@@ -114,6 +117,7 @@ def list_rses(filters={}, vo='def'):
 
     :returns: List of all RSEs.
     """
+    vo = map_vo(vo)
     if not filters:
         filters = {}
 
@@ -133,6 +137,7 @@ def del_rse_attribute(rse, key, issuer, vo='def'):
     :return: True if RSE attribute was deleted successfully, False otherwise.
     """
 
+    vo = map_vo(vo)
     rse_id = rse_module.get_rse_id(rse=rse, vo=vo)
 
     kwargs = {'rse': rse, 'rse_id': rse_id, 'key': key}
@@ -153,6 +158,7 @@ def add_rse_attribute(rse, key, value, issuer, vo='def'):
 
     returns: True if successful, False otherwise.
     """
+    vo = map_vo(vo)
     rse_id = rse_module.get_rse_id(rse=rse, vo=vo)
 
     kwargs = {'rse': rse, 'rse_id': rse_id, 'key': key, 'value': value}
@@ -172,6 +178,7 @@ def list_rse_attributes(rse, vo='def'):
     :returns: List of all RSE attributes for a RSE_MODULE.
     """
 
+    vo = map_vo(vo)
     rse_id = rse_module.get_rse_id(rse=rse, vo=vo)
     return rse_module.list_rse_attributes(rse_id=rse_id)
 
@@ -208,6 +215,7 @@ def add_protocol(rse, issuer, vo='def', **data):
     :param vo: The VO to act on.
     :param data: Parameters (protocol identifier, port, hostname, ...) provided by the request.
     """
+    vo = map_vo(vo)
     rse_id = rse_module.get_rse_id(rse=rse, vo=vo)
 
     kwargs = {'rse': rse, 'rse_id': rse_id}
@@ -226,6 +234,7 @@ def get_rse_protocols(rse, issuer, vo='def'):
 
     :returns: A dict with all supported protocols and their attibutes.
     """
+    vo = map_vo(vo)
     rse_id = rse_module.get_rse_id(rse=rse, vo=vo)
     return rse_module.get_rse_protocols(rse_id)
 
@@ -243,6 +252,7 @@ def del_protocols(rse, scheme, issuer, vo='def', hostname=None, port=None):
     :param port: The port (to be used if more than one protocol using the same
                  identifier and hostname are present)
     """
+    vo = map_vo(vo)
     rse_id = rse_module.get_rse_id(rse=rse, vo=vo)
     kwargs = {'rse': rse, 'rse_id': rse_id}
     if not permission.has_permission(issuer=issuer, vo=vo, action='del_protocol', kwargs=kwargs):
@@ -262,6 +272,7 @@ def update_protocols(rse, scheme, data, issuer, vo='def', hostname=None, port=No
     :param hostname: The hostname (to be used if more then one protocol using the same identifier are present)
     :param port: The port (to be used if more than one protocol using the same identifier and hostname are present)
     """
+    vo = map_vo(vo)
     rse_id = rse_module.get_rse_id(rse=rse, vo=vo)
     kwargs = {'rse': rse, 'rse_id': rse_id}
     if not permission.has_permission(issuer=issuer, vo=vo, action='update_protocol', kwargs=kwargs):
@@ -282,6 +293,7 @@ def set_rse_usage(rse, source, used, free, issuer, vo='def'):
 
     :returns: List of RSE usage data.
     """
+    vo = map_vo(vo)
     rse_id = rse_module.get_rse_id(rse=rse, vo=vo)
 
     kwargs = {'rse': rse, 'rse_id': rse_id}
@@ -302,6 +314,7 @@ def get_rse_usage(rse, issuer, source=None, per_account=False, vo='def'):
 
     :returns: True if successful, otherwise false.
     """
+    vo = map_vo(vo)
     rse_id = rse_module.get_rse_id(rse=rse, vo=vo)
     usages = rse_module.get_rse_usage(rse_id=rse_id, source=source, per_account=per_account)
 
@@ -323,6 +336,7 @@ def list_rse_usage_history(rse, issuer, source=None, vo='def'):
 
     :returns: A list of historic RSE usage.
     """
+    vo = map_vo(vo)
     rse_id = rse_module.get_rse_id(rse=rse, vo=vo)
     for u in rse_module.list_rse_usage_history(rse_id=rse_id, source=source):
         yield api_update_return_dict(u)
@@ -340,6 +354,7 @@ def set_rse_limits(rse, name, value, issuer, vo='def'):
 
     :returns: True if successful, otherwise false.
     """
+    vo = map_vo(vo)
     rse_id = rse_module.get_rse_id(rse=rse, vo=vo)
     kwargs = {'rse': rse, 'rse_id': rse_id}
     if not permission.has_permission(issuer=issuer, vo=vo, action='set_rse_limits', kwargs=kwargs):
@@ -359,6 +374,7 @@ def delete_rse_limits(rse, name, issuer, vo='def'):
 
     :returns: True if successful, otherwise false.
     """
+    vo = map_vo(vo)
     rse_id = rse_module.get_rse_id(rse=rse, vo=vo)
     kwargs = {'rse': rse, 'rse_id': rse_id}
     if not permission.has_permission(issuer=issuer, vo=vo, action='delete_rse_limits', kwargs=kwargs):
@@ -377,6 +393,7 @@ def get_rse_limits(rse, issuer, vo='def'):
 
     :returns: True if successful, otherwise false.
     """
+    vo = map_vo(vo)
     rse_id = rse_module.get_rse_id(rse=rse, vo=vo)
     return rse_module.get_rse_limits(rse_id=rse_id)
 
@@ -391,6 +408,7 @@ def parse_rse_expression(rse_expression, vo='def'):
     :returns:  List of RSEs
     :raises:   InvalidRSEExpression
     """
+    vo = map_vo(vo)
     rses = parse_expression(rse_expression, filter={'vo': vo})
     return [rse['rse'] for rse in rses]
 
@@ -406,6 +424,7 @@ def update_rse(rse, parameters, issuer, vo='def'):
 
     :raises RSENotFound: If RSE is not found.
     """
+    vo = map_vo(vo)
     rse_id = rse_module.get_rse_id(rse=rse, vo=vo)
     kwargs = {'rse': rse, 'rse_id': rse_id}
     if not permission.has_permission(issuer=issuer, vo=vo, action='update_rse', kwargs=kwargs):
@@ -432,6 +451,7 @@ def add_distance(source, destination, issuer, vo='def', ranking=None, distance=N
     :param failed: Failed FTS transfers as an integer.
     :param transfer_speed: FTS transfer speed as an integer.
     """
+    vo = map_vo(vo)
     kwargs = {'source': source, 'destination': destination}
     if not permission.has_permission(issuer=issuer, vo=vo, action='add_distance', kwargs=kwargs):
         raise exception.AccessDenied('Account %s can not add RSE distances' % (issuer))
@@ -458,6 +478,7 @@ def update_distance(source, destination, parameters, issuer, vo='def'):
     :param issuer: The issuer account.
     :param vo: The VO to act on.
     """
+    vo = map_vo(vo)
     kwargs = {'source': source, 'destination': destination}
     if not permission.has_permission(issuer=issuer, vo=vo, action='update_distance', kwargs=kwargs):
         raise exception.AccessDenied('Account %s can not update RSE distances' % (issuer))
@@ -481,6 +502,7 @@ def get_distance(source, destination, issuer, vo='def'):
 
     :returns distance: List of dictionaries.
     """
+    vo = map_vo(vo)
     distances = distance_module.get_distances(src_rse_id=rse_module.get_rse_id(source, vo=vo),
                                               dest_rse_id=rse_module.get_rse_id(destination, vo=vo))
 
@@ -500,6 +522,7 @@ def add_qos_policy(rse, qos_policy, issuer, vo='def'):
     :returns: True if successful, except otherwise.
     """
 
+    vo = map_vo(vo)
     rse_id = rse_module.get_rse_id(rse=rse, vo=vo)
     kwargs = {'rse_id': rse_id}
     if not permission.has_permission(issuer=issuer, action='add_qos_policy', kwargs=kwargs):
@@ -520,6 +543,7 @@ def delete_qos_policy(rse, qos_policy, issuer, vo='def'):
     :returns: True if successful, silent failure if QoS policy does not exist.
     """
 
+    vo = map_vo(vo)
     rse_id = rse_module.get_rse_id(rse=rse, vo=vo)
     kwargs = {'rse_id': rse}
     if not permission.has_permission(issuer=issuer, action='delete_qos_policy', kwargs=kwargs):
@@ -539,5 +563,6 @@ def list_qos_policies(rse, issuer, vo='def'):
     :returns: List containing all QoS policies.
     """
 
+    vo = map_vo(vo)
     rse_id = rse_module.get_rse_id(rse=rse, vo=vo)
     return rse_module.list_qos_policies(rse_id)

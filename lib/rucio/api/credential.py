@@ -22,6 +22,7 @@ from rucio.api import permission
 from rucio.common import exception
 from rucio.core import credential
 from rucio.core.rse import get_rse_id
+from rucio.common.utils import map_vo
 
 
 def get_signed_url(account, appid, ip, rse, service, operation, url, lifetime, vo='def'):
@@ -42,6 +43,7 @@ def get_signed_url(account, appid, ip, rse, service, operation, url, lifetime, v
     :returns: Signed URL as a variable-length string.
     """
 
+    vo = map_vo(vo)
     kwargs = {'account': account}
     if not permission.has_permission(issuer=account, vo=vo, action='get_signed_url', kwargs=kwargs):
         raise exception.AccessDenied('Account %s can not get signed URL for rse=%s, service=%s, operation=%s, url=%s, lifetime=%s' % (account,

@@ -16,6 +16,7 @@ from rucio.api import permission
 from rucio.common import exception
 from rucio.common.schema import validate_schema
 from rucio.common.types import InternalAccount
+from rucio.common.utils import map_vo
 from rucio.core import importer
 
 
@@ -27,6 +28,7 @@ def import_data(data, issuer, vo='def'):
     :param issuer: the issuer.
     :param vo: the VO of the issuer.
     """
+    vo = map_vo(vo)
     kwargs = {'issuer': issuer}
     validate_schema(name='import', obj=data, vo=vo)
     if not permission.has_permission(issuer=issuer, vo=vo, action='import', kwargs=kwargs):

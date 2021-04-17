@@ -23,7 +23,7 @@ from rucio.common.config import config_get_bool
 from rucio.common.exception import AccessDenied
 from rucio.common.schema import validate_schema
 from rucio.common.types import InternalAccount, InternalScope
-from rucio.common.utils import api_update_return_dict
+from rucio.common.utils import api_update_return_dict, map_vo
 from rucio.core import rule
 
 
@@ -67,6 +67,7 @@ def add_replication_rule(dids, copies, rse_expression, weight, lifetime, groupin
     :param vo:                         The VO to act on.
     :returns:                          List of created replication rules.
     """
+    vo = map_vo(vo)
     if account is None:
         account = issuer
 
@@ -120,6 +121,7 @@ def get_replication_rule(rule_id, issuer, estimate_ttc=None, vo='def'):
     :param issuer: The issuing account of this operation.
     :param vo: The VO of the issuer.
     """
+    vo = map_vo(vo)
     kwargs = {'rule_id': rule_id}
     if is_multi_vo() and not has_permission(issuer=issuer, vo=vo, action='access_rule_vo', kwargs=kwargs):
         raise AccessDenied('Account %s can not access rules at other VOs.' % (issuer))
@@ -134,6 +136,7 @@ def list_replication_rules(filters={}, vo='def'):
     :param filters: dictionary of attributes by which the results should be filtered.
     :param vo: The VO to act on.
     """
+    vo = map_vo(vo)
     # If filters is empty, create a new dict to avoid overwriting the function's default
     if not filters:
         filters = {}
@@ -163,6 +166,7 @@ def list_replication_rule_history(rule_id, issuer, vo='def'):
     :param issuer: The issuing account of this operation.
     :param vo: The VO of the issuer.
     """
+    vo = map_vo(vo)
     kwargs = {'rule_id': rule_id}
     if is_multi_vo() and not has_permission(issuer=issuer, vo=vo, action='access_rule_vo', kwargs=kwargs):
         raise AccessDenied('Account %s can not access rules at other VOs.' % (issuer))
@@ -177,6 +181,7 @@ def list_replication_rule_full_history(scope, name, vo='def'):
     :param name: The name of the DID.
     :param vo: The VO to act on.
     """
+    vo = map_vo(vo)
     scope = InternalScope(scope, vo=vo)
     rules = rule.list_rule_full_history(scope, name)
     for r in rules:
@@ -191,6 +196,7 @@ def list_associated_replication_rules_for_file(scope, name, vo='def'):
     :param name:  Name of the file.
     :param vo: The VO to act on.
     """
+    vo = map_vo(vo)
     scope = InternalScope(scope, vo=vo)
     rules = rule.list_associated_rules_for_file(scope=scope, name=name)
     for r in rules:
@@ -207,6 +213,7 @@ def delete_replication_rule(rule_id, purge_replicas, issuer, vo='def'):
     :param vo:             The VO to act on.
     :raises:               RuleNotFound, AccessDenied
     """
+    vo = map_vo(vo)
     kwargs = {'rule_id': rule_id, 'purge_replicas': purge_replicas}
     if is_multi_vo() and not has_permission(issuer=issuer, vo=vo, action='access_rule_vo', kwargs=kwargs):
         raise AccessDenied('Account %s can not access rules at other VOs.' % (issuer))
@@ -225,6 +232,7 @@ def update_replication_rule(rule_id, options, issuer, vo='def'):
     :param vo:          The VO to act on.
     :raises:            RuleNotFound if no Rule can be found.
     """
+    vo = map_vo(vo)
     kwargs = {'rule_id': rule_id, 'options': options}
     if is_multi_vo() and not has_permission(issuer=issuer, vo=vo, action='access_rule_vo', kwargs=kwargs):
         raise AccessDenied('Account %s can not access rules at other VOs.' % (issuer))
@@ -256,6 +264,7 @@ def reduce_replication_rule(rule_id, copies, exclude_expression, issuer, vo='def
     :param vo:                  The VO to act on.
     :raises:                    RuleReplaceFailed, RuleNotFound
     """
+    vo = map_vo(vo)
     kwargs = {'rule_id': rule_id, 'copies': copies, 'exclude_expression': exclude_expression}
     if is_multi_vo() and not has_permission(issuer=issuer, vo=vo, action='access_rule_vo', kwargs=kwargs):
         raise AccessDenied('Account %s can not access rules at other VOs.' % (issuer))
@@ -273,6 +282,7 @@ def examine_replication_rule(rule_id, issuer, vo='def'):
     :param issuer: The issuing account of this operation.
     :param vo: The VO of the issuer.
     """
+    vo = map_vo(vo)
     kwargs = {'rule_id': rule_id}
     if is_multi_vo() and not has_permission(issuer=issuer, vo=vo, action='access_rule_vo', kwargs=kwargs):
         raise AccessDenied('Account %s can not access rules at other VOs.' % (issuer))
@@ -293,6 +303,7 @@ def move_replication_rule(rule_id, rse_expression, issuer, vo='def'):
     :param vo:                  The VO to act on.
     :raises:                    RuleNotFound, RuleReplaceFailed
     """
+    vo = map_vo(vo)
     kwargs = {'rule_id': rule_id, 'rse_expression': rse_expression}
     if is_multi_vo() and not has_permission(issuer=issuer, vo=vo, action='access_rule_vo', kwargs=kwargs):
         raise AccessDenied('Account %s can not access rules at other VOs.' % (issuer))

@@ -16,6 +16,7 @@
 from rucio.common.types import InternalAccount, InternalScope
 from rucio.core import temporary_did
 from rucio.core.rse import get_rse_id
+from rucio.common.utils import map_vo
 
 
 def add_temporary_dids(dids, issuer, vo='def'):
@@ -26,6 +27,7 @@ def add_temporary_dids(dids, issuer, vo='def'):
     :param issuer: The issuer account.
     :param vo: The VO to act on.
     """
+    vo = map_vo(vo)
     for did in dids:
         if 'rse' in did and 'rse_id' not in did:
             rse_id = None

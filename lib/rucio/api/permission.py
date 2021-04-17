@@ -33,6 +33,8 @@ def has_permission(issuer, action, kwargs, vo='def'):
     :param kwargs: List of arguments for the action.
     :returns: True if account is allowed to call the API call, otherwise False
     """
+    # map_vo not called here as all other calls do the mapping,
+    # so this would do it twice.
 
     kwargs = deepcopy(kwargs)
     if 'rse' in kwargs and 'rse_id' not in kwargs:
